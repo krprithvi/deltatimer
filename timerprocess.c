@@ -78,6 +78,95 @@ void TimerSet(int interval, int microseconds) {
     }
 }
 
+// Printing the delta timer
+void printdeltatimer(timernode *head){
+    if(head == NULL){
+        printf("Printing delta timer : Delta timer is empty \n");
+        return;
+    }
+    head->time = TimerGet();
+    printf("Delta timer : ");
+    while(head){
+        printf("%d|%02f -> ", head->sequence_number, head->time);
+        head = head->next;
+    }
+    printf("NULL\n");
+}
+
+
+// Setting a timer. This takes care maintaining the delta timer linked list when adding a new timer
+void settimer(timernode **head, int sequence_number, float time){
+    lockres = true;
+    int seconds;
+    float useconds;
+    if(*head == NULL){
+        (*head) = (timernode*)malloc(sizeof(timernode));
+        (*head)->sequence_number = sequence_number;
+        (*head)->time = time;
+        // Set the timer
+        seconds = (int)time;
+        useconds = time - seconds;
+        printf("Checking time : %d %f\n", seconds, useconds);
+        TimerSet(seconds, (seconds == 0 && useconds*1000000 < 100) ? 100 : useconds*1000000);
+        printdeltatimer(*head);
+        lockres = false;
+        return;
+    }
+    (*head)->time = TimerGet();
+    printf("After head - %d\n", sequence_number);
+    timernode *cnode = *head, *cnodenext, *previous = NULL;
+    if(cnode == NULL){printf("Cnode is null\n");}
+    bool changehead = true;
+    while(cnode != NULL && cnode->time < time){
+        printf("In here %d\n", sequence_number);
+        changehead = false;
+        printf("Deleting time : %f\n", cnode->time);
+        time = time - cnode->time;
+        if(cnode->next == NULL){
+            break;
+        }
+        previous = cnode;
+        cnode = cnode->next;
+    }
+    printf("Came out \n");
+    timernode *newtn = malloc(timernodesize);
+        printf("A little bit back \n");
+        fflush(stdout);
+    newtn->sequence_number = sequence_number;
+    newtn->time= time;
+    if(changehead){
+        newtn->next = (*head);
+        (*head)->time -= newtn->time;
+        (*head) = newtn;
+        time = (*head)->time;
+        seconds = (int)time;
+        useconds = time - seconds;
+        TimerSet(seconds, (seconds == 0 && useconds*1000000 < 100) ? 100 : useconds*1000000);
+    }
+    else{
+        printf("Over here for sure\n");
+        fflush(stdout);
+        if(cnode->next == NULL && cnode->time < time){
+            newtn->time -= cnode->time;
+            newtn->next = NULL;
+            cnode->next = newtn;
+        }
+        else if(previous == NULL){
+            cnode->next = newtn;
+            newtn->next = NULL;
+        }
+        else{
+            previous->next = newtn;
+            newtn->next = cnode;
+            cnode->time -= newtn->time;
+        }
+        lockres = false;
+    }
+    printdeltatimer(*head);
+    return;
+}
+
+
 int main(int argc, char *argv[]){
     int namelen;
     struct sockaddr_in name;
