@@ -35,6 +35,10 @@ typedef struct timernode{
     struct timernode* next;
 }timernode;
 
+int timernodesize = sizeof(timernode);
+
+timernode *head = NULL;
+
 float TimerGet(){
     struct itimerval it_val;
     getitimer(ITIMER_REAL, &it_val);
