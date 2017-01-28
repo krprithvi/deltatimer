@@ -35,6 +35,38 @@ typedef struct timernode{
     struct timernode* next;
 }timernode;
 
+void TimerSet(int, int);
+void TimerStop(int signum) {
+    if(head == NULL) {printf("Why is it null ? \n"); return;}
+    printf("\nTimer ran out! Stopping timer for sequence no %d\n", head->sequence_number);
+    timedout msg;
+    msg.action = '3';
+    msg.sequence_number = head->sequence_number;
+    sendto (sock, (char *) &msg, sizeof msg, 0,
+        (struct sockaddr *) &tcpd_socket,
+        (socklen_t) sizeof (struct sockaddr_in));
+    return;
+}
+void TimerSet(int interval, int microseconds) {
+    struct itimerval it_val;
+
+    printf("interval : %d, microseconds : %d\n", interval,microseconds + 1000 > 999999 ? 999999 : microseconds + 1000);
+    fflush(stdout);
+    it_val.it_value.tv_sec = interval;
+    it_val.it_value.tv_usec = microseconds + 1000 > 999999 ? 999999 : microseconds + 1000;
+    it_val.it_interval.tv_sec = 0;
+    it_val.it_interval.tv_usec = 0;
+
+    if (signal(SIGALRM, TimerStop) == SIG_ERR) {
+        perror("Unable to catch SIGALRM");
+        exit(1);
+    }
+    if (setitimer(ITIMER_REAL, &it_val, NULL) == -1) {
+        perror("error calling setitimer()");
+        exit(1);
+    }
+}
+
 int main(int argc, char *argv[]){
     int namelen;
     struct sockaddr_in name;
