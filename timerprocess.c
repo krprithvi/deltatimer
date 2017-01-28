@@ -11,6 +11,30 @@
 #define TIMERPORT 1030
 #define TCPDPORT 10809
 
+
+bool lockres = false;
+// Creating tcpd socket
+struct sockaddr_in tcpd_socket;
+int sock;
+
+// Creating custom data types for network communication
+typedef struct timedout{
+    char action;
+    int sequence_number;
+}timedout;
+
+typedef struct timermessage{
+    int action;
+    int sequence_number;
+    float time;
+}timermessage;
+
+typedef struct timernode{
+    int sequence_number;
+    float time;
+    struct timernode* next;
+}timernode;
+
 int main(int argc, char *argv[]){
     int namelen;
     struct sockaddr_in name;
