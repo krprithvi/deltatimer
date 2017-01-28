@@ -35,6 +35,13 @@ typedef struct timernode{
     struct timernode* next;
 }timernode;
 
+float TimerGet(){
+    struct itimerval it_val;
+    getitimer(ITIMER_REAL, &it_val);
+    float time = it_val.it_value.tv_sec + (it_val.it_value.tv_usec / 1000000.0);
+    return time;
+}
+
 void TimerSet(int, int);
 void TimerStop(int signum) {
     if(head == NULL) {printf("Why is it null ? \n"); return;}
