@@ -73,6 +73,24 @@ void main(int argc, char *argv[])
     }
     bcopy((char *)hp->h_addr, (char *)&name.sin_addr, hp->h_length);
 
+    /* send message to server */
+    int i;
+    int sequence_numbers[] = {1,2,3,1,10,20,30};
+    int sleeptimes[] = {1,1,1,1,1,1,1};
+    float times[] = {18,5,14,0,3,5,1};
+    int setorcancel[] = {1,1,1,2,1,1,1};
+    for(i=0;i<(sizeof(times)/sizeof(float));i++){
+        if(setorcancel[i] == 1){
+            printf("Setting a timer for %f seconds with sequence no %d\n", times[i], sequence_numbers[i]);
+            settimer(times[i], sequence_numbers[i]);
+        }
+        else{
+            printf("Cancel a timer with sequence no %d\n", sequence_numbers[i]);
+            canceltimer(sequence_numbers[i]);
+        }
+        sleep(sleeptimes[i]);
+    }
+
     close(sock);
     exit(0);
     return;
