@@ -166,7 +166,61 @@ void settimer(timernode **head, int sequence_number, float time){
     return;
 }
 
+// Cancelling a timer. Modifies the Delta timer LL accordingly.
+void canceltimer(timernode **head, int sequence_number){
+    if(*head == NULL){
+        printf("Cancelling timer : Delta timer is empty \n");
+        return;
+    }
+    int seconds;
+    float useconds;
+    timernode *cnode = *head, *dnode, *previous = NULL; float timetobeadded;
+    if((*head)->sequence_number == sequence_number){
+        dnode = *head;
+        (*head) = (*head)->next;
+        if(*head != NULL){
+        free(dnode);
+        (*head)->time = (*head)->time + TimerGet();
+        seconds = (int)((*head)->time);
+        useconds = ((*head)->time) - seconds;
+        TimerSet(seconds, useconds*1000000);
+        }
+        else{
+        seconds = 0;
+        useconds = -0.001000;
+        TimerSet(seconds, useconds*1000000);
+        }
+        printdeltatimer(*head);
+        return;
+    }
+    else{
+        while(cnode->sequence_number != sequence_number){
+            if(cnode->next == NULL){
+                break;
+            }
+            previous = cnode;
+            cnode = cnode->next;
+        }
+        if(cnode->next == NULL) {
+            if(cnode->sequence_number == sequence_number){
+                previous->next = NULL;
+                free(cnode);
+            }
+            else{
+                printf("Sorry. Sequence no does not exist. \n");
+            }
+        }
+        else{
+            previous->next = cnode->next;
+            cnode->next->time += cnode->time;
+            free(cnode);
+        }
+        printdeltatimer(*head);
+    }
+    return;
+}
 
+// Driver program
 int main(int argc, char *argv[]){
     int namelen;
     struct sockaddr_in name;
