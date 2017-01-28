@@ -18,6 +18,31 @@ typedef struct timermessage{
     float time;
 }timermessage;
 
+// Cancel a timer function for a sequence number
+void canceltimer(int sequence_number){
+    timermessage msg;
+
+    msg.action = 2;
+    msg.sequence_number = sequence_number;
+    msg.time = 0;
+    if(sendto(sock, (char*)&msg, sizeof msg, 0, (struct sockaddr *)&name, sizeof(name)) <0) {
+        perror("sending datagram message");
+        exit(4);
+    }
+}
+
+// Set a timer function for a specific sequence number and a specified amount of time
+void settimer(float time, int sequence_number){
+    timermessage msg;
+
+    msg.action = 1;
+    msg.sequence_number = sequence_number;
+    msg.time = time;
+    if(sendto(sock, (char*)&msg, sizeof msg, 0, (struct sockaddr *)&name, sizeof(name)) <0) {
+        perror("sending datagram message");
+        exit(4);
+    }
+}
 /* client program called with host name and port number of server */
 void main(int argc, char *argv[])
 {
