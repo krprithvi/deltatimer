@@ -11,6 +11,13 @@
 int sock;
 struct sockaddr_in name;
 
+// Added the structure of the timer message
+typedef struct timermessage{
+    int action;
+    int sequence_number;
+    float time;
+}timermessage;
+
 /* client program called with host name and port number of server */
 void main(int argc, char *argv[])
 {
